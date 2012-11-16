@@ -19,7 +19,7 @@ then
 	ISPID=`ps -p "$1" --no-headers`
 	if [ -n "$ISPID" ]
 	then
-		waitpid $1
+		strace -p "$1" &> /dev/null
 		echo "It's finished!"
 	else
 		echo "No PID: ${1}"
