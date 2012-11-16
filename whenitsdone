@@ -1,0 +1,13 @@
+#!/bin/bash -x
+
+# Quit if no arguments
+if [ $# -eq 0 ]
+then
+	echo "Please provide a PID to monitor" 1>&2
+	echo "Usage:"
+	echo "$ whenitsdone 1234"
+	echo "$ whenitsdone 9876 jon@example.com"
+	echo "$ whenitsdone 1337 jon@example.com \"All files deleted\""
+	echo "If no email addresses are supplied, I'll try reading email addresses line-by-line from ~/.whenitsdone"
+	exit 1
+fi
