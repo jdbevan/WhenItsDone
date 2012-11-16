@@ -4,10 +4,24 @@
 if [ $# -eq 0 ]
 then
 	echo "Please provide a PID to monitor" 1>&2
+	echo ""
 	echo "Usage:"
 	echo "$ whenitsdone 1234"
 	echo "$ whenitsdone 9876 jon@example.com"
 	echo "$ whenitsdone 1337 jon@example.com \"All files deleted\""
 	echo "If no email addresses are supplied, I'll try reading email addresses line-by-line from ~/.whenitsdone"
 	exit 1
+fi
+
+# Check first argument
+if [ $# -gt 0 ]
+then
+	ISPID=`ps -p "$1" --no-headers`
+	if [ -n "$ISPID" ]
+	then
+		waitpid $1
+		echo "It's finished!"
+	else
+		echo "No PID: ${1}"
+	fi
 fi
