@@ -1,5 +1,11 @@
 #!/bin/bash -x
 
+PID=""
+EMAIL=""
+SUBJ=""
+HEADERS=""
+BODY=""
+
 function printhelp {
 	echo "Please provide an active PID to monitor" 1>&2
 	echo ""
@@ -15,16 +21,48 @@ function printhelp {
 if [ $# -eq 0 ]
 then
 	printhelp
+else
+	for ARG in "$@"
+	do
+		# Store non-zero leading integers as PID to check
+		if [[ $ARG =~ ^[1-9][0-9]*$ ]]
+		then
+			PID="$ARG"
+		# Store email address
+		elif [[ $ARG =~ ^[a-zA-Z0-9_+%=-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]+$ ]]
+		then
+			EMAIL="$ARG"
+		# Store email subject
+		else
+			SUBJ="$ARG"
+		fi
+	done
 fi
 
-# Check first argument
-if [ $# -gt 0 ]
+# Check email address
+if [ -z "$EMAIL" ]
 then
-	ISPID=`ps -p "$1" --no-headers`
+	echo "No email address specified" 1>&2
+	exit 1
+fi
+
+# Check email subject
+if [ -z "$SUBJ" ]
+then
+	SUBJ="Process terminated"
+fi
+
+# Check PID
+if [ -n "$PID" ]
+then
+	ISPID=`ps u -p "$PID" --no-headers`
 	if [ -n "$ISPID" ]
 	then
-		strace -p "$1" &> /dev/null
-		echo "It's finished!"
+		strace -p "$PID" &> /dev/null
+		HEADERS="Subject: $SUBJ\nTo: $EMAIL\nMIME-Version: 1.0\nContent-type: text/plain\n\n"
+		BODY="The process with PID: $PID terminated at $(date).\n\nUSER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND\n$ISPID"
+		EMAIL=$HEADERS$BODY
+		echo -e $EMAIL | sendmail -t
 	else
 		printhelp
 	fi
