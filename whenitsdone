@@ -1,9 +1,7 @@
 #!/bin/bash -x
 
-# Quit if no arguments
-if [ $# -eq 0 ]
-then
-	echo "Please provide a PID to monitor" 1>&2
+function printhelp {
+	echo "Please provide an active PID to monitor" 1>&2
 	echo ""
 	echo "Usage:"
 	echo "$ whenitsdone 1234"
@@ -11,6 +9,12 @@ then
 	echo "$ whenitsdone 1337 jon@example.com \"All files deleted\""
 	echo "If no email addresses are supplied, I'll try reading email addresses line-by-line from ~/.whenitsdone"
 	exit 1
+}
+
+# Quit if no arguments
+if [ $# -eq 0 ]
+then
+	printhelp
 fi
 
 # Check first argument
@@ -22,6 +26,6 @@ then
 		strace -p "$1" &> /dev/null
 		echo "It's finished!"
 	else
-		echo "No PID: ${1}"
+		printhelp
 	fi
 fi
